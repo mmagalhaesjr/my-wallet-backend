@@ -29,10 +29,17 @@ export async function salvarTransacao(req, res) {
 }
 
 export async function listarTransacoes(req, res) {
+    const { authorization } = req.headers
+    const token = authorization.replace('Bearer ', '')
 
     try {
-        const transacoes = await db.collection('transacoes').find().toArray()
-        res.send(transacoes)
+
+        const usuario = await db.collection('sessoes').findOne({ token })
+
+        if (!usuario) return res.sendStatus(400)
+        const minhasTransacoes = await db.collection('transacoes').find({ idUsuario: usuario.id }).toArray()
+        res.send(minhasTransacoes)
+
     } catch (error) {
         res.status(500).send(error.message)
     }

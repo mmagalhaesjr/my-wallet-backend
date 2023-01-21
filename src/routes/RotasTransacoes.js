@@ -4,7 +4,7 @@ import { application, Router } from 'express';
 const rotasTransacoes = Router()
 
 rotasTransacoes.post('/nova-transacao',salvarTransacao)
-rotasTransacoes.get("/home", listarTransacoes)
+rotasTransacoes.get("/transacoes", listarTransacoes)
 
 
 export default rotasTransacoes
