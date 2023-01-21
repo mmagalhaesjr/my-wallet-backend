@@ -9,6 +9,7 @@ export async function cadastro(req, res){
     const senhaCriptografada = bcrypt.hashSync(password, 10);
 
     const validacao = usuarioSchema.validate({ name, email, password, confirmPassword })
+    
     if (validacao.error) {
         console.log(validacao.error.details)
         return res.sendStatus(422)
@@ -46,12 +47,10 @@ export async function login(req,res){
 
         const token = uuid()
         await db.collection("sessoes").insertOne({
-            id:usuario._id, 
+            id: usuario._id, 
             token:token
         })
         
-        
-
         return res.status(200).send({token})
 
 

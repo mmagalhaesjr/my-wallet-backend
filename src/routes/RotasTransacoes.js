@@ -1,10 +1,10 @@
-import { transacoes } from '../controller/Transacoes.js';
-import { Router } from 'express';
+import { listarTransacoes, salvarTransacao } from '../controller/Transacoes.js';
+import { application, Router } from 'express';
 
 const rotasTransacoes = Router()
 
-rotasTransacoes.get("/home", transacoes)
+rotasTransacoes.post('/nova-transacao',salvarTransacao)
+rotasTransacoes.get("/home", listarTransacoes)
 
-// router.post("/novatransacao")
 
 export default rotasTransacoes

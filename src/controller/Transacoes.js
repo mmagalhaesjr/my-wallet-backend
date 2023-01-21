@@ -1,7 +1,40 @@
 import db from "../config/DataBase.js"
+import { transacaoSchema } from "../model/TransacaoSchema.js"
 
-export async function transacoes(req,res){
-    // tem que receber um token pelo headers e ai buscar esse usuario pelo token no banco de dados
-    const todosUsuarios = await db.collection("usuarios").find().toArray()
-    res.send(todosUsuarios)
+
+export async function salvarTransacao(req, res) {
+    const { valor, descricao, tipo } = req.body
+    const { authorization } = req.headers
+    const token = authorization.replace("Bearer ", "")
+
+    const validacao = transacaoSchema.validate({ valor, descricao, tipo })
+
+    if (validacao.error) {
+        console.log(validacao.error.details)
+        return res.sendStatus(422)
+    }
+
+    try {
+        const usuario = await db.collection('sessoes').findOne({ token })
+
+        if (!usuario) return res.sendStatus(400)
+
+        await db.collection('transacoes').insertOne({ valor, descricao, tipo, idUsuario: usuario.id })
+        res.status(201).send('Transação salva com sucesso!')
+
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+
 }
+
+export async function listarTransacoes(req, res) {
+
+    try {
+        const transacoes = await db.collection('transacoes').find().toArray()
+        res.send(transacoes)
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+}
+
