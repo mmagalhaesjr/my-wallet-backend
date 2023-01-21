@@ -1,12 +1,14 @@
 import bcrypt from 'bcrypt';
 import db from '../config/DataBase.js';
-import { usuarioSchema } from '../model/usuarioSchema.js';
+import {v4 as uuid} from 'uuid';
+import { usuarioSchema, loginSchema } from '../model/usuarioSchema.js';
+
 export async function cadastro(req, res){
-    const { name, email, password } = req.body
+    const { name, email, password, confirmPassword } = req.body
 
     const senhaCriptografada = bcrypt.hashSync(password, 10);
 
-    const validacao = usuarioSchema.validate({ name, email, password })
+    const validacao = usuarioSchema.validate({ name, email, password, confirmPassword })
     if (validacao.error) {
         console.log(validacao.error.details)
         return res.sendStatus(422)
@@ -28,26 +30,33 @@ export async function cadastro(req, res){
 export async function login(req,res){
     const { email, password } = req.body
 
-    // const usuarioSchema = Joi.object({
-    //         email: Joi.string().email({ tlds: { allow: false } }),
-    //         password: Joi.string().min(3).required(),
-    //     })
-
-    // const validacao = usuarioSchema.validate(email,password)
-    // if (validacao.error) {
-    //     return res.sendStatus(422)
-    // }
+    const validacao = loginSchema.validate({email,password})
+    if (validacao.error) {
+        return res.sendStatus(422)
+    }
 
     try {
-        const validacao = await db.collection("usuarios").findOne({ email })
+        const usuario = await db.collection("usuarios").findOne({ email })
+        if (!usuario) return res.status(400).send("Email ou senha invalidos")
 
-        if (!validacao) return res.status(400).send("Email ou senha invalidos")
+        const senhaCorreta = bcrypt.compareSync(password, usuario.password)
+        if (!senhaCorreta) return res.status(400).send("Email ou senha invalidos")
 
-        if (password != validacao.password) return res.status(400).send("Email ou senha invalidos")
 
-        return res.status(200).send(`Online`)
+
+        const token = uuid()
+        await db.collection("sessoes").insertOne({
+            id:usuario._id, 
+            token:token
+        })
+        
+        
+
+        return res.status(200).send({token})
+
 
     } catch (error) {
         res.status(500).send(error.message)
-    }
+        
+}
 }

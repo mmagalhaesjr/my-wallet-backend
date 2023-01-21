@@ -10,6 +10,8 @@ server.use(cors());
 
 server.use([rotasAutenticacao, rotasTransacoes])
 
+
+
 server.listen(PORTA, () => {
     console.log(`*** RODANDO NA PORTA ${PORTA} ***`);
 });
