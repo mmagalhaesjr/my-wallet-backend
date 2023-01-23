@@ -12,7 +12,7 @@ export async function cadastro(req, res){
     
     if (validacao.error) {
         console.log(validacao.error.details)
-        return res.sendStatus(422)
+        return res.status(422).send("Preencha os dados corretamente!")
     }   
 
     try {
@@ -33,15 +33,15 @@ export async function login(req,res){
 
     const validacao = loginSchema.validate({email,password})
     if (validacao.error) {
-        return res.sendStatus(422)
+        return res.status(422).send("Preencha os dados corretamente!")
     }
 
     try {
         const usuario = await db.collection("usuarios").findOne({ email })
-        if (!usuario) return res.status(400).send("Email ou senha invalidos")
+        if (!usuario) return res.status(400).send("Email ou senha inválidos")
 
         const senhaCorreta = bcrypt.compareSync(password, usuario.password)
-        if (!senhaCorreta) return res.status(400).send("Email ou senha invalidos")
+        if (!senhaCorreta) return res.status(400).send("Email ou senha inválidos")
 
 
 

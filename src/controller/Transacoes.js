@@ -1,8 +1,12 @@
+import dayjs from "dayjs"
 import db from "../config/DataBase.js"
 import { transacaoSchema } from "../model/TransacaoSchema.js"
 
 
 export async function salvarTransacao(req, res) {
+
+
+    
     const { valor, descricao, tipo } = req.body
     const { authorization } = req.headers
     const token = authorization.replace("Bearer ", "")
@@ -11,15 +15,15 @@ export async function salvarTransacao(req, res) {
 
     if (validacao.error) {
         console.log(validacao.error.details)
-        return res.sendStatus(422)
+        return res.status(422)
     }
 
     try {
         const usuario = await db.collection('sessoes').findOne({ token })
 
-        if (!usuario) return res.sendStatus(400)
+        if (!usuario) return res.status(400).send("Token inválido!")
 
-        await db.collection('transacoes').insertOne({ valor, descricao, tipo, idUsuario: usuario.id })
+        await db.collection('transacoes').insertOne({ valor, descricao, tipo, idUsuario: usuario.id, data: dayjs().format('DD/MM')})
         res.status(201).send('Transação salva com sucesso!')
 
     } catch (error) {
@@ -36,7 +40,7 @@ export async function listarTransacoes(req, res) {
 
         const usuario = await db.collection('sessoes').findOne({ token })
 
-        if (!usuario) return res.sendStatus(400)
+        if (!usuario) return res.status(400).send("Token inválido!")
         const minhasTransacoes = await db.collection('transacoes').find({ idUsuario: usuario.id }).toArray()
         res.send(minhasTransacoes)
 

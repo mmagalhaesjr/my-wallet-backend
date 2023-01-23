@@ -8,7 +8,7 @@ let db
 try {
     await mongoClient.connect();
     db = mongoClient.db();
-    console.log('**CONECTADO**');
+    console.log('**CONECTADO AO BANCO DE DADOS**');
 
 } catch (error) {
     console.log(error);
