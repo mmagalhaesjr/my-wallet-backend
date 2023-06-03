@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
 import db from '../config/DataBase.js';
 import {v4 as uuid} from 'uuid';
-import { usuarioSchema, loginSchema } from '../model/usuarioSchema.js';
+import { usuarioSchema, loginSchema } from '../model/UsuarioSchema.js';
+
 
 export async function cadastro(req, res){
     const { name, email, password, confirmPassword } = req.body
@@ -51,11 +52,29 @@ export async function login(req,res){
             token:token
         })
         
-        return res.status(200).send({token})
+        return res.status(200).send({token, usuario: usuario.name})
 
 
     } catch (error) {
         res.status(500).send(error.message)
         
 }
+}
+
+export async function logout(req,res){
+    const { authorization } = req.headers
+    const token = authorization.replace("Bearer ", "")
+
+    try {
+        const session = await db.collection('sessoes').findOne({ token })
+
+        if (!session) return res.status(400).send("Token inválido!")
+
+        await db.collection('sessoes').deleteOne({token:token})
+        res.sendStatus(202)
+
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+
 }
